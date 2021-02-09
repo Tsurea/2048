@@ -9,10 +9,10 @@ class Game:
         self.tableau = [['*' for i in range(4)] for j in range(4)]
         self.begin = [2] * 9 + [4] * 1
 
-        self.direction = {'left': [],
-                        'right': [],
-                        'up': [],
-                        'down': []}
+        self.direction = {'left': [lambda i: i, lambda c: c > 0, lambda *args: (args[1], args[0])],
+                        'right': [lambda i: 4 - (i + 1), lambda c: c < 3, lambda *args: (args[1], args[0])],
+                        'up': [lambda i: i, lambda c: c > 0, lambda *args: args],
+                        'down': [lambda i: 4 - (i + 1), lambda c: c < 3, lambda *args: args]}
     def reset(self):
         for i in range(4):
             for j in range(4):
@@ -36,31 +36,33 @@ class Game:
 
         for i in range(4):
             for j in range(4):
-                c = 4 - (i + 1)
+                c = self.direction[direction][0](i)
 
-                if c < 3 and game.tableau[c][j] != "*":
+                t = self.direction[direction][2](c, j)
+
+                if self.direction[direction][1](i) and self.tableau[t[0]][t[1]] != "*":
                     # Devant c'est vide
-                    if game.tableau[c + 1][j] == "*":
+                    if self.tableau[c + 1][j] == "*":
                         mouvement, happen = True, 1
 
                         # Arriver a la bonne place
-                        if game.tableau[c][j].rect.y >= 150 * (c + 1) + 103:
-                            game.tableau[c + 1][j] = game.tableau[c][j]
-                            game.tableau[c][j] = "*"
+                        if self.tableau[c][j].rect.y >= 150 * (c + 1) + 103:
+                            self.tableau[c + 1][j] = self.tableau[c][j]
+                            self.tableau[c][j] = "*"
                         else:
-                            game.tableau[c][j].rect.y += 15
+                            self.tableau[c][j].rect.y += 15
 
                     # Pour fussioner de nombre
-                    elif game.tableau[c][j].number == game.tableau[c + 1][j].number and game.tableau[c][j].fusion == True and game.tableau[c + 1][j].fusion == True:
+                    elif self.tableau[c][j].number == self.tableau[c + 1][j].number and self.tableau[c][j].fusion == True and self.tableau[c + 1][j].fusion == True:
                         mouvement, happen = True, 1
 
-                        if game.tableau[c][j].rect.y >= game.tableau[c + 1][j].rect.y:
-                            game.tableau[c][j] = "*"
-                            game.tableau[c + 1][j].change_image(game.tableau[c + 1][j].number * 2)
-                            game.tableau[c + 1][j].fusion = False
+                        if self.tableau[c][j].rect.y >= self.tableau[c + 1][j].rect.y:
+                            self.tableau[c][j] = "*"
+                            self.tableau[c + 1][j].change_image(self.tableau[c + 1][j].number * 2)
+                            self.tableau[c + 1][j].fusion = False
                         else:
-                            game.tableau[c][j].rect.y += 15
-                    
+                            self.tableau[c][j].rect.y += 15
+        
         
         return mouvement
     
